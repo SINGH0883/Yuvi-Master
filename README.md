@@ -68,31 +68,32 @@ Built on Manifest V3, **Yuvi Master** operates silently in the background on eve
 ## 🔄 System Architecture & Workflow
 
 ```mermaid
-flowchart TD
-    A["📄 Web Page Execution (document_start)"] --> B["Inject content.js Engine"]
-    
-    subgraph CSS_LAYER ["1. Text Selection CSS Layer"]
-        B --> C["Inject global user-select: text !important"]
-    end
-    
-    subgraph SANITIZER_LAYER ["2. Inline Handler Sanitizer"]
-        B --> D["Wipe oncopy, onpaste, oncut & oncontextmenu properties"]
+flowchart LR
+    A["📄 Web Page Loaded"] --> B["Inject content.js Engine"]
+
+    subgraph PREPARATION ["1. DOM Unblockers"]
+        direction TB
+        B --> C["Inject user-select: text !important"]
+        B --> D["Wipe oncopy & onpaste handlers"]
     end
 
-    subgraph COPY_ENGINE ["3. Copy & Selection Engine"]
-        E["User Highlights & Copies Text"] --> F["Store Selection in Extension Memory Buffer (storedText)"]
+    subgraph COPY_ENGINE ["2. Copy Engine"]
+        E["User Copies Text"] --> F["Store Selection in Memory"]
     end
 
-    subgraph PASTE_ENGINE ["4. Smart Insertion Engine (Ctrl + V / Cmd + V)"]
-        G["User Triggers Ctrl + V / Cmd + V"] --> H["Override Site e.preventDefault() & e.stopPropagation()"]
-        H --> I{"Try navigator.clipboard.readText()"}
-        I -->|Allowed| J["Extract System Clipboard Data"]
-        I -->|Blocked / Security Permission| K["Fallback to Memory Buffer (storedText)"]
-        J --> L["insertTextSmart(text)"]
+    subgraph PASTE_ENGINE ["3. Smart Paste Engine (Ctrl+V / Cmd+V)"]
+        G["User Presses Ctrl+V"] --> H["Override e.preventDefault()"]
+        H --> I{"Read Clipboard"}
+        I -->|Allowed| J["System Clipboard"]
+        I -->|Blocked| K["Memory Buffer"]
+        J --> L["insertTextSmart()"]
         K --> L
-        L --> M["Splice Cursor Coordinates & Dispatch 'input' + 'change' Events"]
-        M --> N["✅ Successful Text Paste on Protected Form"]
+        L --> M["Dispatch Reactive Events"]
+        M --> N["✅ Successful Text Paste"]
     end
+
+    PREPARATION --> PASTE_ENGINE
+    COPY_ENGINE --> PASTE_ENGINE
 ```
 
 ---
