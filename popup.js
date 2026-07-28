@@ -1,42 +1,49 @@
-// Yuvi Master - Extension Popup Script
+// Yuvi Master - Extension Popup Script (Global Auto-Block System)
 
 const storageArea = (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync)
   ? chrome.storage.sync
   : (typeof chrome !== "undefined" && chrome.storage ? chrome.storage.local : null);
 
 let currentDomain = "";
-let blockedSites = [];
+let allowedSites = [];
+let globalBlockAuto = true;
 
 document.addEventListener("DOMContentLoaded", async () => {
   await initPopup();
 });
 
 async function initPopup() {
-  blockedSites = await getBlockedSites();
+  const data = await getStorageData();
+  globalBlockAuto = data.globalBlockAuto;
+  allowedSites = data.allowedSites;
+  
   await detectCurrentTabDomain();
   renderUI();
   setupEventListeners();
 }
 
-function getBlockedSites() {
+function getStorageData() {
   return new Promise((resolve) => {
     if (!storageArea) {
-      resolve([]);
+      resolve({ globalBlockAuto: true, allowedSites: [] });
       return;
     }
-    storageArea.get({ blockedSites: [] }, (items) => {
-      resolve(items.blockedSites || []);
+    storageArea.get({ globalBlockAuto: true, allowedSites: [] }, (items) => {
+      resolve({
+        globalBlockAuto: items.globalBlockAuto !== false,
+        allowedSites: items.allowedSites || []
+      });
     });
   });
 }
 
-function saveBlockedSites(sites) {
+function saveStorageData(data) {
   return new Promise((resolve) => {
     if (!storageArea) {
       resolve();
       return;
     }
-    storageArea.set({ blockedSites: sites }, () => {
+    storageArea.set(data, () => {
       resolve();
     });
   });
@@ -45,25 +52,24 @@ function saveBlockedSites(sites) {
 function cleanDomain(urlOrDomain) {
   if (!urlOrDomain) return "";
   let domain = urlOrDomain.trim().toLowerCase();
-  
-  // Remove protocol
   domain = domain.replace(/^(https?:\/\/)?(www\.)?/, "");
-  // Remove path, query string, hash, and port
-  domain = domain.split("/")[0].split("?")[0].split("#")[0].split(":")[0];
-  
-  return domain;
+  return domain.split("/")[0].split("?")[0].split("#")[0].split(":")[0];
 }
 
-function isMatch(host, blockedDomain) {
-  if (!host || !blockedDomain) return false;
+function isMatch(host, domain) {
+  if (!host || !domain) return false;
   const cleanHost = cleanDomain(host);
-  const cleanBlocked = cleanDomain(blockedDomain);
+  const cleanTarget = cleanDomain(domain);
 
   return (
-    cleanHost === cleanBlocked ||
-    cleanHost.endsWith("." + cleanBlocked) ||
-    cleanBlocked.endsWith("." + cleanHost)
+    cleanHost === cleanTarget ||
+    cleanHost.endsWith("." + cleanTarget) ||
+    cleanTarget.endsWith("." + cleanHost)
   );
+}
+
+function isDomainWhitelisted(host) {
+  return allowedSites.some((site) => isMatch(host, site));
 }
 
 function detectCurrentTabDomain() {
@@ -93,54 +99,66 @@ function detectCurrentTabDomain() {
 }
 
 function renderUI() {
+  const globalToggle = document.getElementById("globalToggle");
   const currentDomainEl = document.getElementById("currentDomain");
   const statusBadge = document.getElementById("statusBadge");
   const toggleCurrentBtn = document.getElementById("toggleCurrentBtn");
   const siteListEl = document.getElementById("siteList");
   const siteCountEl = document.getElementById("siteCount");
 
+  // Render global toggle
+  globalToggle.checked = globalBlockAuto;
+
   // Render current tab status
   if (currentDomain) {
     currentDomainEl.textContent = currentDomain;
-    const isCurrentBlocked = blockedSites.some((site) => isMatch(currentDomain, site));
+    const isWhitelisted = isDomainWhitelisted(currentDomain);
 
-    if (isCurrentBlocked) {
-      statusBadge.className = "status-badge blocked";
-      statusBadge.textContent = "🚫 Blocked";
-      toggleCurrentBtn.className = "btn btn-secondary";
-      toggleCurrentBtn.textContent = "✅ Unblock Current Site";
-      toggleCurrentBtn.disabled = false;
+    if (globalBlockAuto) {
+      if (isWhitelisted) {
+        statusBadge.className = "status-badge allowed";
+        statusBadge.textContent = "✅ Allowed (Whitelisted)";
+        toggleCurrentBtn.className = "btn btn-danger";
+        toggleCurrentBtn.textContent = "🚫 Block This Site";
+        toggleCurrentBtn.disabled = false;
+      } else {
+        statusBadge.className = "status-badge blocked";
+        statusBadge.textContent = "🚫 Auto-Blocked";
+        toggleCurrentBtn.className = "btn btn-success";
+        toggleCurrentBtn.textContent = "✅ Allow Copy-Paste on This Site";
+        toggleCurrentBtn.disabled = false;
+      }
     } else {
       statusBadge.className = "status-badge allowed";
-      statusBadge.textContent = "✅ Allowed";
+      statusBadge.textContent = "✅ Allowed (Auto-Block OFF)";
       toggleCurrentBtn.className = "btn btn-danger";
-      toggleCurrentBtn.textContent = "🚫 Block Current Site";
-      toggleCurrentBtn.disabled = false;
+      toggleCurrentBtn.textContent = "🚫 Block This Site";
+      toggleCurrentBtn.disabled = true;
     }
   } else {
     currentDomainEl.textContent = "Internal / Blank Page";
     statusBadge.className = "status-badge allowed";
     statusBadge.textContent = "N/A";
-    toggleCurrentBtn.textContent = "🚫 Block Current Site";
+    toggleCurrentBtn.textContent = "✅ Allow Copy-Paste on This Site";
     toggleCurrentBtn.disabled = true;
   }
 
-  // Render site count
-  siteCountEl.textContent = blockedSites.length;
+  // Render allowed site count
+  siteCountEl.textContent = allowedSites.length;
 
-  // Render site list
-  if (blockedSites.length === 0) {
+  // Render allowed sites list
+  if (allowedSites.length === 0) {
     siteListEl.innerHTML = `
       <div class="empty-state">
-        <span>🛡️</span>
-        No sites blocked yet.<br/>Add a site above to block copy-paste on it.
+        <span>✅</span>
+        No custom allowed sites.<br/>All sites visited are automatically copy-blocked.
       </div>
     `;
     return;
   }
 
   siteListEl.innerHTML = "";
-  blockedSites.forEach((site) => {
+  allowedSites.forEach((site) => {
     const item = document.createElement("div");
     item.className = "site-item";
 
@@ -149,9 +167,9 @@ function renderUI() {
 
     const delBtn = document.createElement("button");
     delBtn.className = "delete-btn";
-    delBtn.title = "Remove site";
+    delBtn.title = "Remove site from allowed list";
     delBtn.innerHTML = "✕";
-    delBtn.addEventListener("click", () => removeSite(site));
+    delBtn.addEventListener("click", () => removeAllowedSite(site));
 
     item.appendChild(domainSpan);
     item.appendChild(delBtn);
@@ -160,40 +178,52 @@ function renderUI() {
 }
 
 function setupEventListeners() {
+  const globalToggle = document.getElementById("globalToggle");
   const toggleCurrentBtn = document.getElementById("toggleCurrentBtn");
   const addSiteBtn = document.getElementById("addSiteBtn");
   const siteInput = document.getElementById("siteInput");
 
+  globalToggle.addEventListener("change", async (e) => {
+    globalBlockAuto = e.target.checked;
+    await saveStorageData({ globalBlockAuto });
+    showToast(
+      globalBlockAuto
+        ? "Global Auto-Block Enabled! All visited sites copy-blocked by default."
+        : "Global Auto-Block Disabled.",
+      "success"
+    );
+    renderUI();
+  });
+
   toggleCurrentBtn.addEventListener("click", async () => {
     if (!currentDomain) return;
-    const existingIndex = blockedSites.findIndex((site) => isMatch(currentDomain, site));
+    const isWhitelisted = isDomainWhitelisted(currentDomain);
 
-    if (existingIndex !== -1) {
-      // Remove
-      const removedSite = blockedSites[existingIndex];
-      blockedSites.splice(existingIndex, 1);
-      await saveBlockedSites(blockedSites);
-      showToast(`Removed ${removedSite} from blocklist`, "success");
+    if (isWhitelisted) {
+      // Remove from allowed list (so it gets auto-blocked again)
+      allowedSites = allowedSites.filter((site) => !isMatch(currentDomain, site));
+      await saveStorageData({ allowedSites });
+      showToast(`Auto-blocked copy-paste on ${currentDomain}`, "success");
     } else {
-      // Add
-      blockedSites.unshift(currentDomain);
-      await saveBlockedSites(blockedSites);
-      showToast(`Blocked copy-paste on ${currentDomain}`, "success");
+      // Add to allowed list (whitelist)
+      allowedSites.unshift(currentDomain);
+      await saveStorageData({ allowedSites });
+      showToast(`Allowed copy-paste on ${currentDomain}`, "success");
     }
 
     renderUI();
   });
 
-  addSiteBtn.addEventListener("click", () => handleAddCustomSite());
+  addSiteBtn.addEventListener("click", () => handleAddAllowedSite());
 
   siteInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
-      handleAddCustomSite();
+      handleAddAllowedSite();
     }
   });
 }
 
-async function handleAddCustomSite() {
+async function handleAddAllowedSite() {
   const siteInput = document.getElementById("siteInput");
   const cleaned = cleanDomain(siteInput.value);
 
@@ -202,22 +232,22 @@ async function handleAddCustomSite() {
     return;
   }
 
-  if (blockedSites.includes(cleaned)) {
-    showToast(`${cleaned} is already in the blocklist`, "error");
+  if (allowedSites.includes(cleaned)) {
+    showToast(`${cleaned} is already in the allowed list`, "error");
     return;
   }
 
-  blockedSites.unshift(cleaned);
-  await saveBlockedSites(blockedSites);
+  allowedSites.unshift(cleaned);
+  await saveStorageData({ allowedSites });
   siteInput.value = "";
-  showToast(`Added ${cleaned} to blocklist`, "success");
+  showToast(`Allowed copy-paste on ${cleaned}`, "success");
   renderUI();
 }
 
-async function removeSite(siteToRemove) {
-  blockedSites = blockedSites.filter((site) => site !== siteToRemove);
-  await saveBlockedSites(blockedSites);
-  showToast(`Removed ${siteToRemove}`, "success");
+async function removeAllowedSite(siteToRemove) {
+  allowedSites = allowedSites.filter((site) => site !== siteToRemove);
+  await saveStorageData({ allowedSites });
+  showToast(`Removed ${siteToRemove} from allowed list`, "success");
   renderUI();
 }
 

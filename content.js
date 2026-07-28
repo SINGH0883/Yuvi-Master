@@ -1,7 +1,8 @@
-// Yuvi Master - Content Script with Copy-Paste Blocking Engine
+// Yuvi Master - Content Script (Global Auto-Block Copy Guard)
 
 let storedText = "";
-let blockedSites = [];
+let allowedSites = [];
+let globalBlockAuto = true;
 let isSiteBlocked = false;
 
 // Storage reference
@@ -9,23 +10,27 @@ const storageArea = (typeof chrome !== "undefined" && chrome.storage && chrome.s
   ? chrome.storage.sync
   : (typeof chrome !== "undefined" && chrome.storage ? chrome.storage.local : null);
 
-// Initialize blocked sites and start listeners
+// Initialize storage & start listeners
 initStorage();
 
 function initStorage() {
   if (!storageArea) return;
 
-  storageArea.get({ blockedSites: [] }, (items) => {
-    blockedSites = items.blockedSites || [];
+  storageArea.get({ globalBlockAuto: true, allowedSites: [] }, (items) => {
+    globalBlockAuto = items.globalBlockAuto !== false;
+    allowedSites = items.allowedSites || [];
     checkBlockingState();
   });
 
   if (chrome.storage && chrome.storage.onChanged) {
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-      if (changes.blockedSites) {
-        blockedSites = changes.blockedSites.newValue || [];
-        checkBlockingState();
+    chrome.storage.onChanged.addListener((changes) => {
+      if (changes.globalBlockAuto !== undefined) {
+        globalBlockAuto = changes.globalBlockAuto.newValue !== false;
       }
+      if (changes.allowedSites !== undefined) {
+        allowedSites = changes.allowedSites.newValue || [];
+      }
+      checkBlockingState();
     });
   }
 }
@@ -37,29 +42,34 @@ function cleanDomain(urlOrDomain) {
   return domain.split("/")[0].split("?")[0].split("#")[0].split(":")[0];
 }
 
+function isMatch(host, targetDomain) {
+  if (!host || !targetDomain) return false;
+  const cleanHost = cleanDomain(host);
+  const cleanTarget = cleanDomain(targetDomain);
+  return (
+    cleanHost === cleanTarget ||
+    cleanHost.endsWith("." + cleanTarget) ||
+    cleanTarget.endsWith("." + cleanHost)
+  );
+}
+
 function checkBlockingState() {
   const currentHost = cleanDomain(window.location.hostname);
-  if (!currentHost) {
+
+  if (!currentHost || !globalBlockAuto) {
     isSiteBlocked = false;
     return;
   }
 
-  isSiteBlocked = blockedSites.some((site) => {
-    const cleanSite = cleanDomain(site);
-    if (!cleanSite) return false;
-    return (
-      currentHost === cleanSite ||
-      currentHost.endsWith("." + cleanSite) ||
-      cleanSite.endsWith("." + currentHost)
-    );
-  });
+  // When Global Auto-Block is active, ALL sites are blocked EXCEPT allowed sites
+  const isWhitelisted = allowedSites.some((site) => isMatch(currentHost, site));
+  isSiteBlocked = !isWhitelisted;
 }
 
 // -------------------------------------------------------------
-// EVENT LISTENERS (CAPTURE PHASE FOR STRICT OVERRIDE)
+// CAPTURE-PHASE COPY-PASTE BLOCKING ENGINE
 // -------------------------------------------------------------
 
-// BLOCK / ALLOW: COPY
 document.addEventListener("copy", (e) => {
   if (isSiteBlocked) {
     e.preventDefault();
@@ -67,12 +77,11 @@ document.addEventListener("copy", (e) => {
     return false;
   }
 
-  // Standard Yuvi Master helper behavior: store text selection
+  // Allowed site behavior: store text selection for smart fallback
   const text = window.getSelection().toString();
   if (text) storedText = text;
 }, true);
 
-// BLOCK / ALLOW: CUT
 document.addEventListener("cut", (e) => {
   if (isSiteBlocked) {
     e.preventDefault();
@@ -81,7 +90,6 @@ document.addEventListener("cut", (e) => {
   }
 }, true);
 
-// BLOCK / ALLOW: PASTE
 document.addEventListener("paste", (e) => {
   if (isSiteBlocked) {
     e.preventDefault();
@@ -90,7 +98,6 @@ document.addEventListener("paste", (e) => {
   }
 }, true);
 
-// KEYDOWN INTERCEPTOR: CTRL/CMD + C, V, X
 document.addEventListener("keydown", async (e) => {
   const key = e.key ? e.key.toLowerCase() : "";
   const isCtrlOrCmd = e.ctrlKey || e.metaKey;
@@ -104,24 +111,20 @@ document.addEventListener("keydown", async (e) => {
     return;
   }
 
-  // Standard Yuvi Master helper behavior: Smart Ctrl+V fallback
+  // Allowed site behavior: Smart Ctrl+V fallback
   if (isCtrlOrCmd && key === "v") {
     e.preventDefault();
-
     let text = storedText;
 
     try {
       const clip = await navigator.clipboard.readText();
       if (clip) text = clip;
-    } catch (err) {
-      console.log("Clipboard blocked, using stored text");
-    }
+    } catch (err) {}
 
     insertTextSmart(text);
   }
 }, true);
 
-// Right click context menu paste support for non-blocked sites
 document.addEventListener("contextmenu", async () => {
   if (isSiteBlocked) return;
 
@@ -132,15 +135,15 @@ document.addEventListener("contextmenu", async () => {
 }, true);
 
 // -------------------------------------------------------------
-// DOM TEXT INSERTER (FOR NON-BLOCKED SITES)
+// DOM TEXT INSERTER (FOR ALLOWED SITES ONLY)
 // -------------------------------------------------------------
+
 function insertTextSmart(text) {
   if (!text || isSiteBlocked) return;
 
   const el = document.activeElement;
   if (!el) return;
 
-  // INPUT / TEXTAREA
   if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
     const start = el.selectionStart || 0;
     const end = el.selectionEnd || 0;
@@ -155,13 +158,11 @@ function insertTextSmart(text) {
     return;
   }
 
-  // CONTENT EDITABLE
   if (el.isContentEditable) {
     document.execCommand("insertText", false, text);
     return;
   }
 
-  // FALLBACK (force focus)
   el.focus();
   document.execCommand("insertText", false, text);
 }

@@ -1,9 +1,9 @@
 <div align="center">
 
-  <h1>✨ Yuvi Master — Smart Copy & Paste Chrome Extension</h1>
+  <h1>✨ Yuvi Master — Automatic Copy & Paste Guard</h1>
 
   <p align="center">
-    <strong>A lightweight Manifest V3 Chrome Extension designed to bypass copy-paste restrictions, force text insertion on protected forms, AND block copy-paste actions on specific user-designated websites.</strong>
+    <strong>A lightweight Manifest V3 Chrome Extension that automatically blocks copy-paste actions across all visited websites by default, featuring an Allowed Sites Whitelist for trusted domains.</strong>
   </p>
 
   <p align="center">
@@ -11,7 +11,7 @@
       <img src="https://img.shields.io/badge/Manifest_Version-V3-38bdf8?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Manifest V3">
     </a>
     <a href="https://github.com/SINGH0883/Yuvi-Master">
-      <img src="https://img.shields.io/badge/JavaScript-Smart_Clipboard-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+      <img src="https://img.shields.io/badge/JavaScript-Auto_Guard-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
     </a>
     <a href="https://github.com/SINGH0883/Yuvi-Master">
       <img src="https://img.shields.io/badge/CSS3-Modern_UI-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
@@ -27,9 +27,9 @@
 
 ## 🌟 Overview
 
-**Yuvi Master** is a high-utility browser extension that restores full copy and paste functionality on web pages that restrict standard clipboard operations, while also offering a site-blocking engine that allows users to selectively **block copy-paste actions on specific websites**.
+**Yuvi Master** is an automatic web guard extension designed to **block copy-paste actions across every site you visit by default**, without requiring manual domain additions.
 
-By capturing text selections at document execution, providing a dual-buffer fallback engine, and syncing user blocklists via `chrome.storage`, **Yuvi Master** gives you total control over clipboard behavior across all web pages.
+Whenever you navigate to a webpage, **Yuvi Master** automatically prevents `copy`, `cut`, `paste`, and keyboard shortcuts (`Ctrl/Cmd+C/V/X`). Users can easily add trusted websites to an **Allowed Sites Whitelist** to enable copy-paste where needed.
 
 ---
 
@@ -38,30 +38,20 @@ By capturing text selections at document execution, providing a dual-buffer fall
 ```mermaid
 flowchart TD
     A["📄 Web Page Loaded (document_start)"] --> B["Inject content.js Listener"]
-    B --> C{"Check Domain against Blocklist"}
+    B --> C{"Is Global Auto-Block ON?"}
 
-    subgraph BLOCKED_SITE ["🚫 Site Blocked Mode"]
-        C -->|Match Found| D["Intercept copy, cut, paste & keydown events (capture phase)"]
-        D --> E["e.preventDefault() & e.stopImmediatePropagation()"]
-        E --> F["❌ Copy-Paste & Shortcuts strictly disabled"]
+    subgraph AUTO_BLOCK_ACTIVE ["🌐 Global Auto-Block Mode (Default: ON)"]
+        C -->|Yes| D{"Is Domain Whitelisted?"}
+        D -->|No (Default)| E["🚫 Automatically Block copy, cut, paste & Ctrl/Cmd+C/V/X"]
+        D -->|Yes (Allowed)| F["✅ Allow Copy & Paste"]
     end
 
-    subgraph ALLOWED_SITE ["✅ Standard / Allowed Mode"]
-        C -->|No Match| G["Enable Smart Copy & Paste Engine"]
-        
-        subgraph COPY_ENGINE ["Copy Event Listener"]
-            G --> H["Store Selection in Memory Buffer (storedText)"]
-        end
-        
-        subgraph PASTE_ENGINE ["Paste Event Listener (Ctrl + V / Right Click)"]
-            G --> I["Try navigator.clipboard.readText()"]
-            I -->|Allowed| J["Use System Clipboard Data"]
-            I -->|Blocked| K["Fallback to Stored Memory Buffer"]
-        end
+    subgraph AUTO_BLOCK_OFF ["⚙️ Global Mode OFF"]
+        C -->|No| F
+    end
 
-        J --> L["insertTextSmart(text)"]
-        K --> L
-        L --> M["✅ Successful Text Paste"]
+    subgraph PASTE_FALLBACK ["Smart Paste Fallback (Whitelisted Sites)"]
+        F --> G["Store Text Selection & Enable Smart Insertion Engine"]
     end
 ```
 
@@ -69,15 +59,11 @@ flowchart TD
 
 ## ⚡ Core Features
 
-* **🚫 Site Copy-Paste Blocker:** Easily add any website to a custom blocklist to strictly prevent copy, cut, paste, and keyboard shortcuts (`Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Cmd+C`, `Cmd+V`, `Cmd+X`).
-* **⚡ 1-Click Current Site Blocking:** Instantly toggle copy-paste permissions for your active browser tab from the popup toolbar.
-* **🛡️ Bypasses Copy & Paste Restrictions:** Overrides `disabled` paste event handlers, blocked context menus, and custom website script restrictions on allowed sites.
-* **💾 Dual-Buffer Fallback System:** Automatically caches highlighted text selections in extension memory. If browser security blocks `navigator.clipboard`, the extension falls back to memory storage.
-* **🎯 Universal DOM Insertion Engine:**
-  * **Input & Textarea:** Injects text precisely at current cursor position (`selectionStart`/`selectionEnd`) and dispatches native reactive `input` events for compatibility with React, Vue, Angular, and Svelte forms.
-  * **ContentEditable Elements:** Uses native text insertion command for rich text editors.
-  * **Protected Fields:** Automatically forces element focus before execution.
-* **✨ Sleek Control Popup:** Modern Inter-font rounded card interface with active domain status detection, quick site addition input, scrollable blocklist manager, and toast feedback.
+* **🌐 Global Auto-Block Mode:** Automatically blocks copy-paste actions on **every website you visit by default** — zero manual configuration required!
+* **✅ Allowed Sites Whitelist:** Easily whitelist trusted websites (e.g. `github.com`) to allow normal copy-paste functionality on those specific domains.
+* **⚡ 1-Click Current Site Whitelisting:** Instantly toggle copy-paste permissions for your current active tab directly from the extension popup.
+* **💾 Dual-Buffer Smart Insertion:** On allowed sites, Yuvi Master provides a smart fallback paste engine for restricted web forms.
+* **✨ Sleek Control Popup:** Modern Inter-font rounded card interface featuring active domain status detection, global toggle switch, quick whitelist addition, and custom site manager.
 
 ---
 
@@ -122,7 +108,7 @@ Developer mode  [  ON  ]
 ### Step 5: Pin & Enjoy!
 * Click the Extensions puzzle icon (🧩) in your browser toolbar next to the address bar.
 * Find **Yuvi Master** and click the **Pin** icon (📌).
-* Manage your blocked sites list or enjoy unrestricted copy-paste capabilities!
+* Enjoy automatic copy-paste protection across all visited web pages!
 
 ---
 
@@ -130,10 +116,10 @@ Developer mode  [  ON  ]
 
 ```
 Yuvi-Master/
-├── manifest.json      # Chrome Extension Manifest V3 Configuration (with Storage Permission)
-├── content.js         # Copy-Paste Blocking & DOM Inserter Content Script
-├── popup.html         # Modern Control Panel Interface
-├── popup.js           # Site Blocklist & Tab Manager Logic
+├── manifest.json      # Chrome Extension Manifest V3 Configuration
+├── content.js         # Global Auto-Block & Whitelist Content Script
+├── popup.html         # Modern Control Panel Interface with Global Toggle
+├── popup.js           # Whitelist & Global State Storage Script
 ├── icon.png           # Extension Toolbar & Store Icon
 └── README.md          # Project Documentation & Installation Guide
 ```

@@ -26,14 +26,14 @@
     .container {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 2px;
+      padding: 2px 2px;
     }
 
     .brand-pill {
@@ -67,16 +67,8 @@
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 12px;
-      padding: 12px;
+      padding: 10px 12px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-
-    .current-site-card {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      border: 1px solid #e2e8f0;
     }
 
     .card-title {
@@ -88,6 +80,82 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toggle-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .toggle-desc {
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    /* Switch styling */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: .2s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2563eb;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    .current-site-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
     }
 
     .domain-display {
@@ -151,6 +219,15 @@
       background: #1d4ed8;
     }
 
+    .btn-success {
+      background: #16a34a;
+      color: #ffffff;
+    }
+
+    .btn-success:hover {
+      background: #15803d;
+    }
+
     .btn-danger {
       background: #ef4444;
       color: #ffffff;
@@ -183,7 +260,7 @@
 
     .input-field {
       flex: 1;
-      padding: 8px 10px;
+      padding: 7px 10px;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
       font-size: 12px;
@@ -198,7 +275,7 @@
 
     .btn-add {
       width: auto;
-      padding: 8px 14px;
+      padding: 7px 12px;
       white-space: nowrap;
     }
 
@@ -206,7 +283,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .badge-count {
@@ -219,7 +296,7 @@
     }
 
     .site-list {
-      max-height: 150px;
+      max-height: 120px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -240,18 +317,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 10px;
+      padding: 7px 10px;
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
       font-size: 12px;
       font-weight: 500;
       color: #1e293b;
-      transition: background 0.15s;
-    }
-
-    .site-item:hover {
-      background: #f1f5f9;
     }
 
     .delete-btn {
@@ -275,7 +347,7 @@
 
     .empty-state {
       text-align: center;
-      padding: 16px 8px;
+      padding: 10px 8px;
       color: #94a3b8;
       font-size: 11px;
       line-height: 1.5;
@@ -283,8 +355,8 @@
 
     .empty-state span {
       display: block;
-      font-size: 18px;
-      margin-bottom: 4px;
+      font-size: 16px;
+      margin-bottom: 2px;
     }
 
     .toast {
@@ -328,8 +400,22 @@
         <img src="icon.png" alt="Yuvi Master" class="brand-icon-img" />
         <div>
           <div class="logo">Yuvi Master</div>
-          <div class="subtitle">Smart Copy & Paste Guard</div>
+          <div class="subtitle">Automatic Copy Guard</div>
         </div>
+      </div>
+    </div>
+
+    <!-- Global Auto-Block Toggle Card -->
+    <div class="card">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">🌐 Auto-Block All Sites</span>
+          <span class="toggle-desc">Blocks copy-paste on every site visited</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="globalToggle" checked />
+          <span class="slider"></span>
+        </label>
       </div>
     </div>
 
@@ -337,38 +423,38 @@
     <div class="card current-site-card">
       <div class="card-title">
         <span>Current Tab</span>
-        <span id="statusBadge" class="status-badge allowed">Allowed</span>
+        <span id="statusBadge" class="status-badge blocked">🚫 Auto-Blocked</span>
       </div>
       <div class="domain-display">
         <span id="currentDomain" class="domain-name">Detecting...</span>
       </div>
-      <button id="toggleCurrentBtn" class="btn btn-danger" disabled>
-        🚫 Block Current Site
+      <button id="toggleCurrentBtn" class="btn btn-success" disabled>
+        ✅ Allow Copy-Paste on This Site
       </button>
     </div>
 
-    <!-- Add Custom Site Card -->
+    <!-- Whitelist Add Card -->
     <div class="card">
-      <div class="card-title">Add Site to Blocklist</div>
+      <div class="card-title">Allow Copy-Paste on Site (Whitelist)</div>
       <div class="input-group">
-        <input type="text" id="siteInput" class="input-field" placeholder="e.g. example.com" />
-        <button id="addSiteBtn" class="btn btn-primary btn-add">+ Add</button>
+        <input type="text" id="siteInput" class="input-field" placeholder="e.g. github.com" />
+        <button id="addSiteBtn" class="btn btn-primary btn-add">+ Allow</button>
       </div>
       <div id="toast" class="toast"></div>
     </div>
 
-    <!-- Blocked Sites List Card -->
+    <!-- Allowed Sites List Card -->
     <div class="card">
       <div class="section-header">
         <div class="card-title" style="margin-bottom:0;">
-          Blocked Sites
+          Allowed Sites (Whitelist)
         </div>
         <span id="siteCount" class="badge-count">0</span>
       </div>
       <div id="siteList" class="site-list">
         <div class="empty-state">
-          <span>🛡️</span>
-          No sites blocked yet.<br/>Add a site above to block copy-paste on it.
+          <span>✅</span>
+          No custom allowed sites.<br/>All sites visited are automatically copy-blocked.
         </div>
       </div>
     </div>
