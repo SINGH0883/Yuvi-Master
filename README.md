@@ -1,9 +1,15 @@
 <div align="center">
 
-  <h1>✨ Yuvi Master — Universal Copy & Paste Enabler</h1>
+  <img src="icon.png" alt="Yuvi Master Logo" width="96" height="96" style="border-radius: 20px; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);" />
+
+  <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 12px;">✨ Yuvi Master</h1>
 
   <p align="center">
-    <strong>A lightweight Manifest V3 Chrome Extension designed to automatically bypass copy-paste restrictions, unblock text selection, and force text insertion on protected web forms across all websites.</strong>
+    <strong>The Ultimate Universal Copy & Paste Enabler Chrome Extension (Manifest V3)</strong>
+  </p>
+
+  <p align="center">
+    <em>Bypass copy-paste restrictions, unlock text selection, and force text insertion on protected forms across any website automatically — zero configuration required!</em>
   </p>
 
   <p align="center">
@@ -11,13 +17,13 @@
       <img src="https://img.shields.io/badge/Manifest_Version-V3-38bdf8?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Manifest V3">
     </a>
     <a href="https://github.com/SINGH0883/Yuvi-Master">
-      <img src="https://img.shields.io/badge/JavaScript-Smart_Clipboard-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+      <img src="https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
     </a>
     <a href="https://github.com/SINGH0883/Yuvi-Master">
-      <img src="https://img.shields.io/badge/CSS3-Modern_UI-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+      <img src="https://img.shields.io/badge/Browser_Support-Chromium_Universal-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Browser Support">
     </a>
     <a href="https://github.com/SINGH0883/Yuvi-Master/blob/main/LICENSE">
-      <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License">
+      <img src="https://img.shields.io/badge/License-MIT-2ea44f.svg?style=for-the-badge" alt="License">
     </a>
   </p>
 
@@ -25,73 +31,109 @@
 
 <hr />
 
-## 🌟 Overview
+## 📖 Table of Contents
 
-**Yuvi Master** is a high-utility browser extension that restores full copy and paste functionality on web pages restricting standard clipboard operations (such as online examination portals, locked form inputs, disabled text fields, or protected articles).
-
-Operating automatically in the background on every web page, **Yuvi Master** overrides restrictive site scripts, enables text selection, wipes inline event blocks, and injects copied text into any `<input>`, `<textarea>`, or `contenteditable` element using a dual-buffer fallback engine.
+- [🌟 Overview](#-overview)
+- [⚡ Key Features](#-key-features)
+- [🔄 System Architecture & Workflow](#-system-architecture--workflow)
+- [🔬 Technical Implementation Matrix](#-technical-implementation-matrix)
+- [🌐 Supported Frameworks & Browsers](#-supported-frameworks--browsers)
+- [💻 Step-by-Step Installation Guide](#-step-by-step-installation-guide)
+- [🛠️ Project File Structure](#️-project-file-structure)
+- [📬 Author & License](#-author--license)
 
 ---
 
-## 🔄 Architecture Workflow Chart
+## 🌟 Overview
+
+**Yuvi Master** is a high-performance, lightweight Chromium extension engineered to **restore full copy, cut, and paste functionality** on web pages that impose aggressive clipboard restrictions (such as online test portals, locked form inputs, disabled text boxes, or copy-protected documentation).
+
+Built on Manifest V3, **Yuvi Master** operates silently in the background on every site you visit. It neutralizes restrictive event handlers, forces CSS text selection capability, and injects copied text directly into active input fields while triggering native reactive form events for full compatibility with modern web applications.
+
+---
+
+## ⚡ Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| **⚡ Universal Always-On Engine** | Works out-of-the-box on 100% of websites automatically without needing setup, complex settings, or ON/OFF toggles. |
+| **🛡️ Bypasses Script Restrictions** | Overrides `disabled` paste handlers, blocked context menus (`right-click`), and custom JS key interceptors. |
+| **💾 Dual-Buffer Fallback System** | Automatically caches copied text selections in an internal extension memory buffer. If browser security blocks `navigator.clipboard`, the extension seamlessly falls back to memory. |
+| **🎯 Reactive Form Insertion** | Injects text precisely at cursor coordinates (`selectionStart`/`selectionEnd`) and dispatches native `input` & `change` events for React, Vue, Angular, and Svelte compatibility. |
+| **🔓 Text Selection CSS Enforcer** | Dynamically injects `user-select: text !important` to ensure text selection is never hidden or blocked by site stylesheets. |
+| **✨ Modern Glassmorphic Popup** | Clean, minimalist rounded popup card interface featuring active domain detection and slick typography. |
+
+---
+
+## 🔄 System Architecture & Workflow
 
 ```mermaid
 flowchart TD
-    A["📄 Web Page Loaded (document_start)"] --> B["Inject content.js Listener"]
+    A["📄 Web Page Execution (document_start)"] --> B["Inject content.js Engine"]
     
-    subgraph CSS_ENFORCER ["Selection CSS Enforcer"]
-        B --> C["Inject user-select: text !important"]
+    subgraph CSS_LAYER ["1. Text Selection CSS Layer"]
+        B --> C["Inject global user-select: text !important"]
     end
     
-    subgraph UNBLOCKER ["Inline Event Handler Cleaner"]
-        B --> D["Wipe oncopy, onpaste, oncontextmenu restrictions"]
+    subgraph SANITIZER_LAYER ["2. Inline Handler Sanitizer"]
+        B --> D["Wipe oncopy, onpaste, oncut & oncontextmenu properties"]
     end
 
-    subgraph COPY_ENGINE ["Copy & Selection Engine"]
-        E["User Highlights & Copies Text"] --> F["Store Selection in Memory Buffer (storedText)"]
+    subgraph COPY_ENGINE ["3. Copy & Selection Engine"]
+        E["User Highlights & Copies Text"] --> F["Store Selection in Extension Memory Buffer (storedText)"]
     end
 
-    subgraph PASTE_ENGINE ["Smart Insertion Engine (Ctrl + V / Cmd + V)"]
-        G["User Presses Ctrl + V"] --> H["Override Site e.preventDefault()"]
+    subgraph PASTE_ENGINE ["4. Smart Insertion Engine (Ctrl + V / Cmd + V)"]
+        G["User Triggers Ctrl + V / Cmd + V"] --> H["Override Site e.preventDefault() & e.stopPropagation()"]
         H --> I{"Try navigator.clipboard.readText()"}
-        I -->|Allowed| J["Use System Clipboard Data"]
-        I -->|Blocked / Permission Denied| K["Fallback to Memory Buffer"]
+        I -->|Allowed| J["Extract System Clipboard Data"]
+        I -->|Blocked / Security Permission| K["Fallback to Memory Buffer (storedText)"]
         J --> L["insertTextSmart(text)"]
         K --> L
-        L --> M["Dispatch Reactive 'input' & 'change' Events"]
+        L --> M["Splice Cursor Coordinates & Dispatch 'input' + 'change' Events"]
         M --> N["✅ Successful Text Paste on Protected Form"]
     end
 ```
 
 ---
 
-## ⚡ Core Features
+## 🔬 Technical Implementation Matrix
 
-* **⚡ Universal Always-On Engine:** Automatically enables copy and paste across **all websites** without needing any manual setup or ON/OFF toggle switches.
-* **🛡️ Bypasses Copy & Paste Restrictions:** Overrides `disabled` paste event handlers, blocked context menus, and custom website script restrictions.
-* **💾 Dual-Buffer Fallback System:** Automatically caches highlighted text selections in extension memory. If browser security blocks `navigator.clipboard`, the extension seamlessly falls back to memory storage.
-* **🎯 Reactive Form Insertion:** Injects text precisely at current cursor position (`selectionStart`/`selectionEnd`) and dispatches native reactive `input` and `change` events for full compatibility with React, Vue, Angular, and Svelte forms.
-* **✨ Clean Popup Interface:** Minimalist rounded popup card UI displaying active website status and brand branding.
-
----
-
-## 🔬 How It Works Under The Hood
-
-| Mechanism | Description |
-| :--- | :--- |
-| **CSS Selection Injection** | Injects `user-select: text !important` dynamically into document head so websites cannot disable text highlighting. |
-| **Inline Handler Sanitizer** | Periodically nullifies `oncopy`, `onpaste`, `oncut`, `oncontextmenu`, and `onselectstart` inline properties set by restrictive scripts. |
-| **Capture-Phase Interception** | Uses event listeners with `useCapture = true` to stop event propagation before website scripts can block key combinations (`Ctrl/Cmd + C/V/X`). |
-| **Reactive DOM Dispatcher** | Triggers native `input` and `change` events after text splicing, allowing form validation scripts in modern web frameworks (React, Vue, Angular) to register pasted values. |
+| Module | Core Logic | Implementation Details |
+| :--- | :--- | :--- |
+| **Selection Enforcer** | `enableTextSelectionCSS()` | Injects `<style>` tag containing `* { user-select: text !important; }` to override site CSS rules blocking text highlighting. |
+| **Handler Sanitizer** | `unblockInlineHandlers()` | Periodically sets `document.oncopy`, `document.onpaste`, `document.oncontextmenu` to `null` to disable inline blocking scripts. |
+| **Capture Listener** | `addEventListener(..., true)` | Uses capture-phase event listeners (`useCapture = true`) to catch `Ctrl/Cmd + C/V/X` keydown events before site scripts receive them. |
+| **Reactive DOM Splicer** | `insertTextSmart()` | Slices input string at `selectionStart` and `selectionEnd`, updates element value, and fires `Event("input")` & `Event("change")` with event bubbling. |
 
 ---
 
-## 💻 How to Install on Your Computer
+## 🌐 Supported Frameworks & Browsers
 
-Follow these quick steps to install **Yuvi Master** on any Chromium-based browser (**Google Chrome**, **Microsoft Edge**, **Brave**, **Vivaldi**, or **Opera**):
+### 🚀 Compatible Form Frameworks
+Compatible with all major frontend frameworks and native web form controls:
+* **React.js & Next.js** (Synthetic event system compatible)
+* **Vue.js & Nuxt.js** (`v-model` reactive state compatible)
+* **Angular** (`ngModel` control compatible)
+* **Svelte & SvelteKit** (`bind:value` compatible)
+* **Standard HTML5 Forms** (`<input>`, `<textarea>`, `[contenteditable]`)
+
+### 🌐 Compatible Browsers
+Works seamlessly across all Chromium-based browsers:
+* **Google Chrome** (v88+)
+* **Microsoft Edge** (v88+)
+* **Brave Browser**
+* **Vivaldi Browser**
+* **Opera & Opera GX**
+
+---
+
+## 💻 Step-by-Step Installation Guide
+
+Follow these quick steps to install **Yuvi Master** on your computer in under 1 minute:
 
 ### Step 1: Download or Clone the Repository
-* **Option A (Git):** Open your terminal/command prompt and run:
+* **Option A (Git):** Open your terminal and run:
   ```bash
   git clone https://github.com/SINGH0883/Yuvi-Master.git
   ```
@@ -100,16 +142,16 @@ Follow these quick steps to install **Yuvi Master** on any Chromium-based browse
 ---
 
 ### Step 2: Open Extensions Page in Your Browser
-Open your preferred browser and navigate to the Extensions management page:
-* **Google Chrome:** Type `chrome://extensions/` in the address bar and press **Enter**.
-* **Microsoft Edge:** Type `edge://extensions/` in the address bar and press **Enter**.
-* **Brave:** Type `brave://extensions/` in the address bar and press **Enter**.
-* **Opera:** Type `opera://extensions` in the address bar and press **Enter**.
+Open your Chromium browser and navigate to the Extensions page:
+* **Google Chrome:** `chrome://extensions/`
+* **Microsoft Edge:** `edge://extensions/`
+* **Brave:** `brave://extensions/`
+* **Opera:** `opera://extensions/`
 
 ---
 
 ### Step 3: Enable Developer Mode
-In the top right corner of the Extensions page, toggle the **Developer mode** switch to **ON** (Enabled).
+Toggle the **Developer mode** switch in the top-right corner to **ON**:
 
 ```
 Developer mode  [  ON  ]
@@ -117,30 +159,30 @@ Developer mode  [  ON  ]
 
 ---
 
-### Step 4: Load the Unpacked Extension
-1. Click the **"Load unpacked"** button that appears in the top left control bar.
-2. A file picker window will open. Select the `Yuvi-Master` folder containing `manifest.json`.
+### Step 4: Load Unpacked Extension
+1. Click the **"Load unpacked"** button in the top toolbar.
+2. Select the `Yuvi-Master` folder containing `manifest.json`.
 3. Click **Select Folder**.
 
 ---
 
 ### Step 5: Pin & Enjoy!
-* Click the Extensions puzzle icon (🧩) in your browser toolbar next to the address bar.
+* Click the Extensions puzzle icon (🧩) in your browser toolbar.
 * Find **Yuvi Master** and click the **Pin** icon (📌).
-* Enjoy unrestricted copy and paste capabilities across all websites!
+* You're all set! Copy and paste freely anywhere on the web!
 
 ---
 
-## 🛠️ Project Structure
+## 🛠️ Project File Structure
 
 ```
 Yuvi-Master/
-├── manifest.json      # Chrome Extension Manifest V3 Configuration
-├── content.js         # Universal Copy-Paste Enabler & DOM Inserter Script
-├── popup.html         # Modern Control Panel Interface
-├── popup.js           # Extension Popup Script
-├── icon.png           # Extension Toolbar & Store Icon
-└── README.md          # Project Documentation & Installation Guide
+├── manifest.json      # Manifest V3 Extension Configuration & Permissions
+├── content.js         # Core Copy-Paste Listener, Selection Enforcer & DOM Inserter
+├── popup.html         # Sleek Glassmorphic Control Interface
+├── popup.js           # Extension Popup Script & Domain Detector
+├── icon.png           # Extension Branding & Store Icon
+└── README.md          # Complete Project Documentation
 ```
 
 ---
