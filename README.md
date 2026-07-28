@@ -1,9 +1,9 @@
 <div align="center">
 
-  <h1>✨ Yuvi Master — Smart Copy & Paste Chrome Extension</h1>
+  <h1>✨ Yuvi Master — Smart Copy & Paste Guard</h1>
 
   <p align="center">
-    <strong>A lightweight Manifest V3 Chrome Extension designed to bypass copy-paste restrictions, force text insertion on protected forms, AND block copy-paste actions on specific user-designated websites.</strong>
+    <strong>A lightweight Manifest V3 Chrome Extension designed to bypass copy-paste restrictions on protected forms, AND block copy-paste actions on specific user-designated websites using a Dual-Engine Blocker.</strong>
   </p>
 
   <p align="center">
@@ -27,9 +27,9 @@
 
 ## 🌟 Overview
 
-**Yuvi Master** is a high-utility browser extension that restores full copy and paste functionality on web pages that restrict standard clipboard operations, while also offering a site-blocking engine that allows users to selectively **block copy-paste actions on specific websites**.
+**Yuvi Master** is a high-utility browser extension that restores full copy and paste functionality on web pages restricting standard clipboard operations, while also offering a **Dual-Engine Copy-Paste Blocker** that allows users to strictly block copy-paste actions on designated websites.
 
-By capturing text selections at document execution, providing a dual-buffer fallback engine, and syncing user blocklists via `chrome.storage`, **Yuvi Master** gives you total control over clipboard behavior across all web pages.
+By combining primary event capture interception with an aggressive secondary CSS/DOM backup engine, **Yuvi Master** ensures copy-paste restrictions are enforced reliably across any site.
 
 ---
 
@@ -40,28 +40,32 @@ flowchart TD
     A["📄 Web Page Loaded (document_start)"] --> B["Inject content.js Listener"]
     B --> C{"Check Domain against Blocklist"}
 
-    subgraph BLOCKED_SITE ["🚫 Site Blocked Mode"]
-        C -->|Match Found| D["Intercept copy, cut, paste & keydown events (capture phase)"]
-        D --> E["e.preventDefault() & e.stopImmediatePropagation()"]
-        E --> F["❌ Copy-Paste & Shortcuts strictly disabled"]
+    subgraph BLOCKED_SITE ["🚫 Site Blocked Mode (Dual-Engine Guard)"]
+        C -->|Match Found| D{"Select Blocker Engine"}
+        D -->|Primary Engine| E["Intercept copy, cut, paste & keydown events (capture phase)"]
+        D -->|Secondary / Backup Engine| F["Inject CSS user-select: none + Selection Sweeper"]
+        D -->|Auto Dual Mode| G["Run Primary Interception + Secondary Backup Fallback"]
+        E --> H["❌ Copy-Paste & Shortcuts strictly disabled"]
+        F --> H
+        G --> H
     end
 
-    subgraph ALLOWED_SITE ["✅ Standard / Allowed Mode"]
-        C -->|No Match| G["Enable Smart Copy & Paste Engine"]
+    subgraph ALLOWED_SITE ["✅ Allowed Mode"]
+        C -->|No Match| I["Enable Smart Copy & Paste Engine"]
         
         subgraph COPY_ENGINE ["Copy Event Listener"]
-            G --> H["Store Selection in Memory Buffer (storedText)"]
+            I --> J["Store Selection in Memory Buffer (storedText)"]
         end
         
         subgraph PASTE_ENGINE ["Paste Event Listener (Ctrl + V / Right Click)"]
-            G --> I["Try navigator.clipboard.readText()"]
-            I -->|Allowed| J["Use System Clipboard Data"]
-            I -->|Blocked| K["Fallback to Stored Memory Buffer"]
+            I --> K["Try navigator.clipboard.readText()"]
+            K -->|Allowed| L["Use System Clipboard Data"]
+            K -->|Blocked| M["Fallback to Stored Memory Buffer"]
         end
 
-        J --> L["insertTextSmart(text)"]
-        K --> L
-        L --> M["✅ Successful Text Paste"]
+        L --> N["insertTextSmart(text)"]
+        M --> N
+        N --> O["✅ Successful Text Paste"]
     end
 ```
 
@@ -69,15 +73,15 @@ flowchart TD
 
 ## ⚡ Core Features
 
-* **🚫 Site Copy-Paste Blocker:** Easily add any website to a custom blocklist to strictly prevent copy, cut, paste, and keyboard shortcuts (`Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Cmd+C`, `Cmd+V`, `Cmd+X`).
+* **🛡️ Dual-Engine Copy-Paste Blocker:**
+  * **⚡ Primary Engine:** Intercepts `copy`, `cut`, `paste`, and keyboard shortcuts (`Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Cmd+C`, `Cmd+V`, `Cmd+X`) at the event capture phase.
+  * **🛡️ Secondary Engine (Aggressive Backup):** Enforces `user-select: none !important`, active selection sweepers (`selectionchange`), and clears inline event handlers if site scripts attempt to bypass standard event blocking.
+  * **🔄 Auto Dual Mode:** Automatically runs the Secondary Backup Engine alongside the Primary Engine for guaranteed enforcement.
 * **⚡ 1-Click Current Site Blocking:** Instantly toggle copy-paste permissions for your active browser tab from the popup toolbar.
-* **🛡️ Bypasses Copy & Paste Restrictions:** Overrides `disabled` paste event handlers, blocked context menus, and custom website script restrictions on allowed sites.
+* **🔓 Bypasses Copy & Paste Restrictions:** Overrides `disabled` paste event handlers, blocked context menus, and custom website script restrictions on allowed sites.
 * **💾 Dual-Buffer Fallback System:** Automatically caches highlighted text selections in extension memory. If browser security blocks `navigator.clipboard`, the extension falls back to memory storage.
-* **🎯 Universal DOM Insertion Engine:**
-  * **Input & Textarea:** Injects text precisely at current cursor position (`selectionStart`/`selectionEnd`) and dispatches native reactive `input` events for compatibility with React, Vue, Angular, and Svelte forms.
-  * **ContentEditable Elements:** Uses native text insertion command for rich text editors.
-  * **Protected Fields:** Automatically forces element focus before execution.
-* **✨ Sleek Control Popup:** Modern Inter-font rounded card interface with active domain status detection, quick site addition input, scrollable blocklist manager, and toast feedback.
+* **🎯 Universal DOM Insertion Engine:** Injects text precisely at cursor position (`selectionStart`/`selectionEnd`) and dispatches native reactive `input` events for compatibility with React, Vue, Angular, and Svelte forms.
+* **✨ Sleek Control Popup:** Modern Inter-font rounded card interface featuring active domain status detection, blocker engine selector, quick site addition input, and scrollable blocklist manager.
 
 ---
 
@@ -122,7 +126,7 @@ Developer mode  [  ON  ]
 ### Step 5: Pin & Enjoy!
 * Click the Extensions puzzle icon (🧩) in your browser toolbar next to the address bar.
 * Find **Yuvi Master** and click the **Pin** icon (📌).
-* Manage your blocked sites list or enjoy unrestricted copy-paste capabilities!
+* Choose your preferred Blocker Engine or enjoy smart copy-paste capabilities!
 
 ---
 
@@ -131,9 +135,9 @@ Developer mode  [  ON  ]
 ```
 Yuvi-Master/
 ├── manifest.json      # Chrome Extension Manifest V3 Configuration (with Storage Permission)
-├── content.js         # Copy-Paste Blocking & DOM Inserter Content Script
-├── popup.html         # Modern Control Panel Interface
-├── popup.js           # Site Blocklist & Tab Manager Logic
+├── content.js         # Dual-Engine Blocker & DOM Inserter Content Script
+├── popup.html         # Modern Control Panel Interface with Engine Selector
+├── popup.js           # Site Blocklist & Engine Mode Storage Logic
 ├── icon.png           # Extension Toolbar & Store Icon
 └── README.md          # Project Documentation & Installation Guide
 ```

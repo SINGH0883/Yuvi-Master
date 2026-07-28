@@ -127,6 +127,39 @@
       border: 1px solid #fecaca;
     }
 
+    .engine-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .engine-toggle-group {
+      display: flex;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 8px;
+    }
+
+    .engine-btn {
+      flex: 1;
+      padding: 6px 4px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .engine-btn.active {
+      background: #ffffff;
+      color: #1e293b;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -219,7 +252,7 @@
     }
 
     .site-list {
-      max-height: 150px;
+      max-height: 120px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -275,7 +308,7 @@
 
     .empty-state {
       text-align: center;
-      padding: 16px 8px;
+      padding: 12px 8px;
       color: #94a3b8;
       font-size: 11px;
       line-height: 1.5;
@@ -283,8 +316,8 @@
 
     .empty-state span {
       display: block;
-      font-size: 18px;
-      margin-bottom: 4px;
+      font-size: 16px;
+      margin-bottom: 2px;
     }
 
     .toast {
@@ -345,6 +378,27 @@
       <button id="toggleCurrentBtn" class="btn btn-danger" disabled>
         🚫 Block Current Site
       </button>
+    </div>
+
+    <!-- Blocking Engine Controls Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>🛡️ Blocker Engine</span>
+        <span id="engineBadge" class="status-badge" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;">Auto Dual</span>
+      </div>
+      <div class="engine-selector" style="margin-top:6px;">
+        <div class="engine-toggle-group">
+          <button id="enginePrimaryBtn" class="engine-btn" title="Standard capture-phase event blocker">
+            ⚡ Primary
+          </button>
+          <button id="engineSecondaryBtn" class="engine-btn" title="Aggressive DOM & CSS selection blocker">
+            🛡️ Secondary (Backup)
+          </button>
+          <button id="engineAutoBtn" class="engine-btn active" title="Automatically use Primary + Secondary fallback">
+            🔄 Auto Dual
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Add Custom Site Card -->
