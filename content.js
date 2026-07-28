@@ -1,37 +1,31 @@
-// Yuvi Master - Content Script with Dual-Engine Copy-Paste Blocker
+// Yuvi Master - Content Script with Copy-Paste Blocking Engine
 
 let storedText = "";
 let blockedSites = [];
-let blockerEngineMode = "auto"; // 'primary' | 'secondary' | 'auto'
 let isSiteBlocked = false;
-let styleElement = null;
 
 // Storage reference
 const storageArea = (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync)
   ? chrome.storage.sync
   : (typeof chrome !== "undefined" && chrome.storage ? chrome.storage.local : null);
 
-// Initialize storage & listeners
+// Initialize blocked sites and start listeners
 initStorage();
 
 function initStorage() {
   if (!storageArea) return;
 
-  storageArea.get({ blockedSites: [], blockerEngineMode: "auto" }, (items) => {
+  storageArea.get({ blockedSites: [] }, (items) => {
     blockedSites = items.blockedSites || [];
-    blockerEngineMode = items.blockerEngineMode || "auto";
     checkBlockingState();
   });
 
   if (chrome.storage && chrome.storage.onChanged) {
-    chrome.storage.onChanged.addListener((changes) => {
+    chrome.storage.onChanged.addListener((changes, namespace) => {
       if (changes.blockedSites) {
         blockedSites = changes.blockedSites.newValue || [];
+        checkBlockingState();
       }
-      if (changes.blockerEngineMode) {
-        blockerEngineMode = changes.blockerEngineMode.newValue || "auto";
-      }
-      checkBlockingState();
     });
   }
 }
@@ -47,7 +41,6 @@ function checkBlockingState() {
   const currentHost = cleanDomain(window.location.hostname);
   if (!currentHost) {
     isSiteBlocked = false;
-    applySecondaryEngine(false);
     return;
   }
 
@@ -60,16 +53,13 @@ function checkBlockingState() {
       cleanSite.endsWith("." + currentHost)
     );
   });
-
-  // Apply or remove secondary aggressive backup engine based on state & mode
-  const shouldRunSecondary = isSiteBlocked && (blockerEngineMode === "secondary" || blockerEngineMode === "auto");
-  applySecondaryEngine(shouldRunSecondary);
 }
 
 // -------------------------------------------------------------
-// PRIMARY BLOCKER ENGINE (CAPTURE PHASE EVENT INTERCEPTION)
+// EVENT LISTENERS (CAPTURE PHASE FOR STRICT OVERRIDE)
 // -------------------------------------------------------------
 
+// BLOCK / ALLOW: COPY
 document.addEventListener("copy", (e) => {
   if (isSiteBlocked) {
     e.preventDefault();
@@ -77,11 +67,12 @@ document.addEventListener("copy", (e) => {
     return false;
   }
 
-  // Allowed site behavior: store selected text for smart fallback
+  // Standard Yuvi Master helper behavior: store text selection
   const text = window.getSelection().toString();
   if (text) storedText = text;
 }, true);
 
+// BLOCK / ALLOW: CUT
 document.addEventListener("cut", (e) => {
   if (isSiteBlocked) {
     e.preventDefault();
@@ -90,6 +81,7 @@ document.addEventListener("cut", (e) => {
   }
 }, true);
 
+// BLOCK / ALLOW: PASTE
 document.addEventListener("paste", (e) => {
   if (isSiteBlocked) {
     e.preventDefault();
@@ -98,6 +90,7 @@ document.addEventListener("paste", (e) => {
   }
 }, true);
 
+// KEYDOWN INTERCEPTOR: CTRL/CMD + C, V, X
 document.addEventListener("keydown", async (e) => {
   const key = e.key ? e.key.toLowerCase() : "";
   const isCtrlOrCmd = e.ctrlKey || e.metaKey;
@@ -111,112 +104,43 @@ document.addEventListener("keydown", async (e) => {
     return;
   }
 
-  // Allowed site behavior: Smart Ctrl+V fallback
+  // Standard Yuvi Master helper behavior: Smart Ctrl+V fallback
   if (isCtrlOrCmd && key === "v") {
     e.preventDefault();
+
     let text = storedText;
+
     try {
       const clip = await navigator.clipboard.readText();
       if (clip) text = clip;
-    } catch (err) {}
+    } catch (err) {
+      console.log("Clipboard blocked, using stored text");
+    }
+
     insertTextSmart(text);
   }
 }, true);
 
-document.addEventListener("contextmenu", async (e) => {
-  if (isSiteBlocked) {
-    // If secondary engine is enabled, also prevent contextmenu copy/paste actions
-    if (blockerEngineMode === "secondary" || blockerEngineMode === "auto") {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      return false;
-    }
-    return;
-  }
+// Right click context menu paste support for non-blocked sites
+document.addEventListener("contextmenu", async () => {
+  if (isSiteBlocked) return;
 
   try {
     const text = await navigator.clipboard.readText();
     insertTextSmart(text);
-  } catch (err) {}
+  } catch (e) {}
 }, true);
 
 // -------------------------------------------------------------
-// SECONDARY BLOCKER ENGINE (AGGRESSIVE BACKUP ENFORCEMENT)
+// DOM TEXT INSERTER (FOR NON-BLOCKED SITES)
 // -------------------------------------------------------------
-
-function applySecondaryEngine(enable) {
-  if (enable) {
-    // 1. Inject CSS user-select: none to prevent text selection
-    if (!styleElement) {
-      styleElement = document.createElement("style");
-      styleElement.id = "yuvi-master-block-style";
-      styleElement.textContent = `
-        html, body, body * {
-          -webkit-user-select: none !important;
-          -moz-user-select: none !important;
-          -ms-user-select: none !important;
-          user-select: none !important;
-        }
-      `;
-      (document.head || document.documentElement).appendChild(styleElement);
-    }
-
-    // 2. Selection sweeper
-    document.addEventListener("selectionchange", clearSelectionSweeper, true);
-    document.addEventListener("selectstart", preventSelectStart, true);
-
-    // 3. Clear inline handlers
-    clearInlineHandlers();
-  } else {
-    // Remove CSS user-select rule
-    if (styleElement && styleElement.parentNode) {
-      styleElement.parentNode.removeChild(styleElement);
-      styleElement = null;
-    }
-
-    document.removeEventListener("selectionchange", clearSelectionSweeper, true);
-    document.removeEventListener("selectstart", preventSelectStart, true);
-  }
-}
-
-function clearSelectionSweeper() {
-  if (!isSiteBlocked) return;
-  const sel = window.getSelection();
-  if (sel && sel.rangeCount > 0) {
-    sel.removeAllRanges();
-  }
-}
-
-function preventSelectStart(e) {
-  if (!isSiteBlocked) return;
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  return false;
-}
-
-function clearInlineHandlers() {
-  try {
-    document.oncopy = null;
-    document.oncut = null;
-    document.onpaste = null;
-    document.onselectstart = null;
-    window.oncopy = null;
-    window.oncut = null;
-    window.onpaste = null;
-    window.onselectstart = null;
-  } catch (e) {}
-}
-
-// -------------------------------------------------------------
-// DOM TEXT INSERTER (FOR ALLOWED SITES ONLY)
-// -------------------------------------------------------------
-
 function insertTextSmart(text) {
   if (!text || isSiteBlocked) return;
 
   const el = document.activeElement;
   if (!el) return;
 
+  // INPUT / TEXTAREA
   if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
     const start = el.selectionStart || 0;
     const end = el.selectionEnd || 0;
@@ -231,11 +155,13 @@ function insertTextSmart(text) {
     return;
   }
 
+  // CONTENT EDITABLE
   if (el.isContentEditable) {
     document.execCommand("insertText", false, text);
     return;
   }
 
+  // FALLBACK (force focus)
   el.focus();
   document.execCommand("insertText", false, text);
 }

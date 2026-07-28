@@ -6,7 +6,6 @@ const storageArea = (typeof chrome !== "undefined" && chrome.storage && chrome.s
 
 let currentDomain = "";
 let blockedSites = [];
-let blockerEngineMode = "auto"; // 'primary' | 'secondary' | 'auto'
 
 document.addEventListener("DOMContentLoaded", async () => {
   await initPopup();
@@ -14,7 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function initPopup() {
   blockedSites = await getBlockedSites();
-  blockerEngineMode = await getBlockerEngineMode();
   await detectCurrentTabDomain();
   renderUI();
   setupEventListeners();
@@ -44,35 +42,13 @@ function saveBlockedSites(sites) {
   });
 }
 
-function getBlockerEngineMode() {
-  return new Promise((resolve) => {
-    if (!storageArea) {
-      resolve("auto");
-      return;
-    }
-    storageArea.get({ blockerEngineMode: "auto" }, (items) => {
-      resolve(items.blockerEngineMode || "auto");
-    });
-  });
-}
-
-function saveBlockerEngineMode(mode) {
-  return new Promise((resolve) => {
-    if (!storageArea) {
-      resolve();
-      return;
-    }
-    storageArea.set({ blockerEngineMode: mode }, () => {
-      resolve();
-    });
-  });
-}
-
 function cleanDomain(urlOrDomain) {
   if (!urlOrDomain) return "";
   let domain = urlOrDomain.trim().toLowerCase();
   
+  // Remove protocol
   domain = domain.replace(/^(https?:\/\/)?(www\.)?/, "");
+  // Remove path, query string, hash, and port
   domain = domain.split("/")[0].split("?")[0].split("#")[0].split(":")[0];
   
   return domain;
@@ -122,11 +98,6 @@ function renderUI() {
   const toggleCurrentBtn = document.getElementById("toggleCurrentBtn");
   const siteListEl = document.getElementById("siteList");
   const siteCountEl = document.getElementById("siteCount");
-  const engineBadge = document.getElementById("engineBadge");
-
-  const enginePrimaryBtn = document.getElementById("enginePrimaryBtn");
-  const engineSecondaryBtn = document.getElementById("engineSecondaryBtn");
-  const engineAutoBtn = document.getElementById("engineAutoBtn");
 
   // Render current tab status
   if (currentDomain) {
@@ -152,25 +123,6 @@ function renderUI() {
     statusBadge.textContent = "N/A";
     toggleCurrentBtn.textContent = "🚫 Block Current Site";
     toggleCurrentBtn.disabled = true;
-  }
-
-  // Render engine mode controls
-  enginePrimaryBtn.classList.remove("active");
-  engineSecondaryBtn.classList.remove("active");
-  engineAutoBtn.classList.remove("active");
-
-  if (blockerEngineMode === "primary") {
-    enginePrimaryBtn.classList.add("active");
-    engineBadge.textContent = "Primary";
-    engineBadge.style.cssText = "background:#fef3c7;color:#92400e;border:1px solid #fde68a;";
-  } else if (blockerEngineMode === "secondary") {
-    engineSecondaryBtn.classList.add("active");
-    engineBadge.textContent = "Secondary (Backup)";
-    engineBadge.style.cssText = "background:#fee2e2;color:#991b1b;border:1px solid #fecaca;";
-  } else {
-    engineAutoBtn.classList.add("active");
-    engineBadge.textContent = "Auto Dual";
-    engineBadge.style.cssText = "background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;";
   }
 
   // Render site count
@@ -212,20 +164,18 @@ function setupEventListeners() {
   const addSiteBtn = document.getElementById("addSiteBtn");
   const siteInput = document.getElementById("siteInput");
 
-  const enginePrimaryBtn = document.getElementById("enginePrimaryBtn");
-  const engineSecondaryBtn = document.getElementById("engineSecondaryBtn");
-  const engineAutoBtn = document.getElementById("engineAutoBtn");
-
   toggleCurrentBtn.addEventListener("click", async () => {
     if (!currentDomain) return;
     const existingIndex = blockedSites.findIndex((site) => isMatch(currentDomain, site));
 
     if (existingIndex !== -1) {
+      // Remove
       const removedSite = blockedSites[existingIndex];
       blockedSites.splice(existingIndex, 1);
       await saveBlockedSites(blockedSites);
       showToast(`Removed ${removedSite} from blocklist`, "success");
     } else {
+      // Add
       blockedSites.unshift(currentDomain);
       await saveBlockedSites(blockedSites);
       showToast(`Blocked copy-paste on ${currentDomain}`, "success");
@@ -240,27 +190,6 @@ function setupEventListeners() {
     if (e.key === "Enter") {
       handleAddCustomSite();
     }
-  });
-
-  enginePrimaryBtn.addEventListener("click", async () => {
-    blockerEngineMode = "primary";
-    await saveBlockerEngineMode("primary");
-    showToast("Engine: Primary Mode (Event Interception)", "success");
-    renderUI();
-  });
-
-  engineSecondaryBtn.addEventListener("click", async () => {
-    blockerEngineMode = "secondary";
-    await saveBlockerEngineMode("secondary");
-    showToast("Engine: Secondary Mode (Aggressive Backup)", "success");
-    renderUI();
-  });
-
-  engineAutoBtn.addEventListener("click", async () => {
-    blockerEngineMode = "auto";
-    await saveBlockerEngineMode("auto");
-    showToast("Engine: Auto Dual Mode (Primary + Fallback)", "success");
-    renderUI();
   });
 }
 
