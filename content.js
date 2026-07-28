@@ -1,149 +1,120 @@
-// Yuvi Master - Content Script (Global Auto-Block Copy Guard)
+// Yuvi Master — Universal Copy & Paste Enabler Content Script
+// Automatically unlocks copy, cut, paste, and text selection on ALL websites at all times.
 
 let storedText = "";
-let allowedSites = [];
-let globalBlockAuto = true;
-let isSiteBlocked = false;
 
-// Storage reference
-const storageArea = (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync)
-  ? chrome.storage.sync
-  : (typeof chrome !== "undefined" && chrome.storage ? chrome.storage.local : null);
-
-// Initialize storage & start listeners
-initStorage();
-
-function initStorage() {
-  if (!storageArea) return;
-
-  storageArea.get({ globalBlockAuto: true, allowedSites: [] }, (items) => {
-    globalBlockAuto = items.globalBlockAuto !== false;
-    allowedSites = items.allowedSites || [];
-    checkBlockingState();
-  });
-
-  if (chrome.storage && chrome.storage.onChanged) {
-    chrome.storage.onChanged.addListener((changes) => {
-      if (changes.globalBlockAuto !== undefined) {
-        globalBlockAuto = changes.globalBlockAuto.newValue !== false;
-      }
-      if (changes.allowedSites !== undefined) {
-        allowedSites = changes.allowedSites.newValue || [];
-      }
-      checkBlockingState();
-    });
-  }
+// -------------------------------------------------------------
+// 1. CSS USER-SELECT ENFORCER (ENABLES SELECTION EVERYWHERE)
+// -------------------------------------------------------------
+function enableTextSelectionCSS() {
+  if (document.getElementById("yuvi-master-enable-select")) return;
+  const style = document.createElement("style");
+  style.id = "yuvi-master-enable-select";
+  style.textContent = `
+    * {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+  `;
+  (document.head || document.documentElement).appendChild(style);
 }
 
-function cleanDomain(urlOrDomain) {
-  if (!urlOrDomain) return "";
-  let domain = urlOrDomain.trim().toLowerCase();
-  domain = domain.replace(/^(https?:\/\/)?(www\.)?/, "");
-  return domain.split("/")[0].split("?")[0].split("#")[0].split(":")[0];
-}
-
-function isMatch(host, targetDomain) {
-  if (!host || !targetDomain) return false;
-  const cleanHost = cleanDomain(host);
-  const cleanTarget = cleanDomain(targetDomain);
-  return (
-    cleanHost === cleanTarget ||
-    cleanHost.endsWith("." + cleanTarget) ||
-    cleanTarget.endsWith("." + cleanHost)
-  );
-}
-
-function checkBlockingState() {
-  const currentHost = cleanDomain(window.location.hostname);
-
-  if (!currentHost || !globalBlockAuto) {
-    isSiteBlocked = false;
-    return;
-  }
-
-  // When Global Auto-Block is active, ALL sites are blocked EXCEPT allowed sites
-  const isWhitelisted = allowedSites.some((site) => isMatch(currentHost, site));
-  isSiteBlocked = !isWhitelisted;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", enableTextSelectionCSS);
+} else {
+  enableTextSelectionCSS();
 }
 
 // -------------------------------------------------------------
-// CAPTURE-PHASE COPY-PASTE BLOCKING ENGINE
+// 2. UNBLOCK INLINE EVENT HANDLERS (ONCOPY, ONPASTE, ONCONTEXTMENU)
 // -------------------------------------------------------------
+function unblockInlineHandlers() {
+  try {
+    document.oncopy = null;
+    document.oncut = null;
+    document.onpaste = null;
+    document.oncontextmenu = null;
+    document.onselectstart = null;
+    window.oncopy = null;
+    window.oncut = null;
+    window.onpaste = null;
+    window.oncontextmenu = null;
+    window.onselectstart = null;
+  } catch (e) {}
+}
 
+unblockInlineHandlers();
+setInterval(unblockInlineHandlers, 2000);
+
+// -------------------------------------------------------------
+// 3. COPY & CUT LISTENERS (RECORD SELECTION IN MEMORY)
+// -------------------------------------------------------------
 document.addEventListener("copy", (e) => {
-  if (isSiteBlocked) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    return false;
+  const selection = window.getSelection().toString();
+  if (selection) {
+    storedText = selection;
   }
-
-  // Allowed site behavior: store text selection for smart fallback
-  const text = window.getSelection().toString();
-  if (text) storedText = text;
+  e.stopPropagation();
 }, true);
 
 document.addEventListener("cut", (e) => {
-  if (isSiteBlocked) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    return false;
+  const selection = window.getSelection().toString();
+  if (selection) {
+    storedText = selection;
   }
+  e.stopPropagation();
 }, true);
 
-document.addEventListener("paste", (e) => {
-  if (isSiteBlocked) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    return false;
-  }
+// Allow right-click context menu everywhere
+document.addEventListener("contextmenu", (e) => {
+  e.stopPropagation();
 }, true);
 
+// -------------------------------------------------------------
+// 4. SMART PASTE ENGINE (CTRL+V / CMD+V OVERRIDE & INJECTION)
+// -------------------------------------------------------------
 document.addEventListener("keydown", async (e) => {
   const key = e.key ? e.key.toLowerCase() : "";
   const isCtrlOrCmd = e.ctrlKey || e.metaKey;
 
-  if (isSiteBlocked) {
-    if (isCtrlOrCmd && (key === "c" || key === "v" || key === "x")) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      return false;
-    }
+  // Unblock Copy & Cut key combinations
+  if (isCtrlOrCmd && (key === "c" || key === "x")) {
+    e.stopPropagation();
+    const selection = window.getSelection().toString();
+    if (selection) storedText = selection;
     return;
   }
 
-  // Allowed site behavior: Smart Ctrl+V fallback
+  // Force Paste execution on Ctrl+V / Cmd+V
   if (isCtrlOrCmd && key === "v") {
     e.preventDefault();
+    e.stopPropagation();
+
     let text = storedText;
 
     try {
-      const clip = await navigator.clipboard.readText();
-      if (clip) text = clip;
-    } catch (err) {}
+      const clipText = await navigator.clipboard.readText();
+      if (clipText) text = clipText;
+    } catch (err) {
+      console.log("Clipboard API read blocked, using stored memory buffer");
+    }
 
     insertTextSmart(text);
   }
 }, true);
 
-document.addEventListener("contextmenu", async () => {
-  if (isSiteBlocked) return;
-
-  try {
-    const text = await navigator.clipboard.readText();
-    insertTextSmart(text);
-  } catch (e) {}
-}, true);
-
 // -------------------------------------------------------------
-// DOM TEXT INSERTER (FOR ALLOWED SITES ONLY)
+// 5. UNIVERSAL DOM TEXT INSERTER (REACTIVE FORM COMPATIBLE)
 // -------------------------------------------------------------
-
 function insertTextSmart(text) {
-  if (!text || isSiteBlocked) return;
+  if (!text) return;
 
   const el = document.activeElement;
   if (!el) return;
 
+  // Standard INPUT / TEXTAREA
   if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
     const start = el.selectionStart || 0;
     const end = el.selectionEnd || 0;
@@ -154,15 +125,20 @@ function insertTextSmart(text) {
       el.value.substring(end);
 
     el.selectionStart = el.selectionEnd = start + text.length;
+
+    // Dispatch native reactive events for React/Vue/Angular/Svelte
     el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
     return;
   }
 
+  // ContentEditable elements (Rich Text Editors)
   if (el.isContentEditable) {
     document.execCommand("insertText", false, text);
     return;
   }
 
+  // Fallback focus & execCommand
   el.focus();
   document.execCommand("insertText", false, text);
 }

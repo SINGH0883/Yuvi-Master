@@ -16,371 +16,88 @@
     }
 
     body {
-      width: 330px;
+      width: 280px;
       background: #f8fafc;
       color: #0f172a;
-      padding: 12px;
-      overflow-x: hidden;
+      padding: 14px;
+      overflow: hidden;
+      border-radius: 16px;
     }
 
     .container {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+      text-align: center;
+      align-items: center;
     }
 
     .header {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      padding: 2px 2px;
-    }
-
-    .brand-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      gap: 6px;
+      padding: 4px 0;
     }
 
     .brand-icon-img {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       object-fit: contain;
-      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
     }
 
     .logo {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 700;
       color: #1e293b;
       letter-spacing: -0.3px;
     }
 
     .subtitle {
-      font-size: 10px;
+      font-size: 11px;
       color: #64748b;
       font-weight: 500;
     }
 
     .card {
+      width: 100%;
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 12px;
-      padding: 10px 12px;
+      padding: 12px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-
-    .card-title {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #64748b;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .toggle-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .toggle-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #0f172a;
-    }
-
-    .toggle-desc {
-      font-size: 10px;
-      color: #64748b;
-    }
-
-    /* Switch styling */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 38px;
-      height: 22px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #cbd5e1;
-      transition: .2s;
-      border-radius: 20px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .2s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: #2563eb;
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(16px);
-    }
-
-    .current-site-card {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      border: 1px solid #e2e8f0;
-    }
-
-    .domain-display {
-      display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .domain-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: #0f172a;
-      word-break: break-all;
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
+      gap: 6px;
+      padding: 6px 12px;
       border-radius: 20px;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .status-badge.allowed {
       background: #dcfce7;
       color: #15803d;
       border: 1px solid #bbf7d0;
+      box-shadow: 0 1px 2px rgba(21, 128, 61, 0.1);
     }
 
-    .status-badge.blocked {
-      background: #fee2e2;
-      color: #b91c1c;
-      border: 1px solid #fecaca;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s ease-in-out;
-    }
-
-    .btn-primary {
-      background: #2563eb;
-      color: #ffffff;
-    }
-
-    .btn-primary:hover {
-      background: #1d4ed8;
-    }
-
-    .btn-success {
-      background: #16a34a;
-      color: #ffffff;
-    }
-
-    .btn-success:hover {
-      background: #15803d;
-    }
-
-    .btn-danger {
-      background: #ef4444;
-      color: #ffffff;
-    }
-
-    .btn-danger:hover {
-      background: #dc2626;
-    }
-
-    .btn-secondary {
-      background: #f1f5f9;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-    }
-
-    .btn-secondary:hover {
-      background: #e2e8f0;
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .input-group {
-      display: flex;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .input-field {
-      flex: 1;
-      padding: 7px 10px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 12px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .input-field:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-    }
-
-    .btn-add {
-      width: auto;
-      padding: 7px 12px;
-      white-space: nowrap;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-
-    .badge-count {
-      background: #e2e8f0;
-      color: #475569;
-      padding: 2px 7px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 600;
-    }
-
-    .site-list {
-      max-height: 120px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding-right: 2px;
-    }
-
-    .site-list::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .site-list::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-
-    .site-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 7px 10px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 12px;
+    .domain-display {
+      font-size: 11px;
+      color: #64748b;
       font-weight: 500;
+      word-break: break-all;
+    }
+
+    .domain-name {
+      font-weight: 600;
       color: #1e293b;
-    }
-
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      transition: color 0.15s, background 0.15s;
-    }
-
-    .delete-btn:hover {
-      color: #ef4444;
-      background: #fee2e2;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 10px 8px;
-      color: #94a3b8;
-      font-size: 11px;
-      line-height: 1.5;
-    }
-
-    .empty-state span {
-      display: block;
-      font-size: 16px;
-      margin-bottom: 2px;
-    }
-
-    .toast {
-      font-size: 11px;
-      font-weight: 500;
-      text-align: center;
-      padding: 5px 8px;
-      border-radius: 6px;
-      margin-top: 6px;
-      display: none;
-    }
-
-    .toast.show {
-      display: block;
-    }
-
-    .toast.success {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .toast.error {
-      background: #fee2e2;
-      color: #991b1b;
     }
 
     .footer {
@@ -396,66 +113,17 @@
 
   <div class="container">
     <div class="header">
-      <div class="brand-pill">
-        <img src="icon.png" alt="Yuvi Master" class="brand-icon-img" />
-        <div>
-          <div class="logo">Yuvi Master</div>
-          <div class="subtitle">Automatic Copy Guard</div>
-        </div>
-      </div>
+      <img src="icon.png" alt="Yuvi Master" class="brand-icon-img" />
+      <div class="logo">Yuvi Master</div>
+      <div class="subtitle">Universal Copy & Paste Enabler ⚡</div>
     </div>
 
-    <!-- Global Auto-Block Toggle Card -->
     <div class="card">
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <span class="toggle-label">🌐 Auto-Block All Sites</span>
-          <span class="toggle-desc">Blocks copy-paste on every site visited</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="globalToggle" checked />
-          <span class="slider"></span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Active Tab Status Card -->
-    <div class="card current-site-card">
-      <div class="card-title">
-        <span>Current Tab</span>
-        <span id="statusBadge" class="status-badge blocked">🚫 Auto-Blocked</span>
+      <div class="status-badge">
+        <span>⚡</span> Copy & Paste Unlocked
       </div>
       <div class="domain-display">
-        <span id="currentDomain" class="domain-name">Detecting...</span>
-      </div>
-      <button id="toggleCurrentBtn" class="btn btn-success" disabled>
-        ✅ Allow Copy-Paste on This Site
-      </button>
-    </div>
-
-    <!-- Whitelist Add Card -->
-    <div class="card">
-      <div class="card-title">Allow Copy-Paste on Site (Whitelist)</div>
-      <div class="input-group">
-        <input type="text" id="siteInput" class="input-field" placeholder="e.g. github.com" />
-        <button id="addSiteBtn" class="btn btn-primary btn-add">+ Allow</button>
-      </div>
-      <div id="toast" class="toast"></div>
-    </div>
-
-    <!-- Allowed Sites List Card -->
-    <div class="card">
-      <div class="section-header">
-        <div class="card-title" style="margin-bottom:0;">
-          Allowed Sites (Whitelist)
-        </div>
-        <span id="siteCount" class="badge-count">0</span>
-      </div>
-      <div id="siteList" class="site-list">
-        <div class="empty-state">
-          <span>✅</span>
-          No custom allowed sites.<br/>All sites visited are automatically copy-blocked.
-        </div>
+        Active on: <span id="currentDomain" class="domain-name">Detecting...</span>
       </div>
     </div>
 
