@@ -15,104 +15,369 @@
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    html, body {
-      width: 250px;
-      height: 185px;
-      background: #ffffff;
-      overflow: hidden;
-      border-radius: 16px;
+    body {
+      width: 330px;
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 12px;
+      overflow-x: hidden;
     }
 
-    .card {
-      width: 100%;
-      height: 100%;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 14px 12px;
-      text-align: center;
+    .container {
       display: flex;
       flex-direction: column;
+      gap: 12px;
+    }
+
+    .header {
+      display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 4px 2px;
     }
 
     .brand-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      padding: 4px 10px;
-      border-radius: 20px;
+      gap: 8px;
     }
 
     .brand-icon {
-      width: 18px;
-      height: 18px;
-      background: #2563eb;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: #ffffff;
-      border-radius: 50%;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 14px;
       font-weight: 700;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
     }
 
     .logo {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 700;
-      color: #1e3a8a;
-      letter-spacing: -0.2px;
+      color: #1e293b;
+      letter-spacing: -0.3px;
     }
 
-    .tagline {
-      font-size: 11px;
+    .subtitle {
+      font-size: 10px;
       color: #64748b;
       font-weight: 500;
     }
 
-    .emoji {
-      font-size: 20px;
-      animation: bounce 2s infinite ease-in-out;
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
+    .current-site-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
     }
 
-    .thanks-pill {
-      font-size: 10.5px;
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .domain-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .domain-name {
+      font-size: 13px;
       font-weight: 600;
       color: #0f172a;
+      word-break: break-all;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-badge.allowed {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status-badge.blocked {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-secondary {
       background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      padding: 3px 10px;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input-field:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    .btn-add {
+      width: auto;
+      padding: 8px 14px;
+      white-space: nowrap;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .badge-count {
+      background: #e2e8f0;
+      color: #475569;
+      padding: 2px 7px;
       border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .site-list {
+      max-height: 150px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 2px;
+    }
+
+    .site-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .site-list::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .site-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #1e293b;
+      transition: background 0.15s;
+    }
+
+    .site-item:hover {
+      background: #f1f5f9;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .delete-btn:hover {
+      color: #ef4444;
+      background: #fee2e2;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 16px 8px;
+      color: #94a3b8;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .empty-state span {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .toast {
+      font-size: 11px;
+      font-weight: 500;
+      text-align: center;
+      padding: 5px 8px;
+      border-radius: 6px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .toast.success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .toast.error {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     .footer {
-      font-size: 9.5px;
+      text-align: center;
+      font-size: 10px;
       color: #94a3b8;
       font-weight: 500;
+      padding-top: 2px;
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="brand-pill">
-      <div class="brand-icon">⚡</div>
-      <div class="logo">Yuvi Master</div>
+  <div class="container">
+    <div class="header">
+      <div class="brand-pill">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="logo">Yuvi Master</div>
+          <div class="subtitle">Smart Copy & Paste Guard</div>
+        </div>
+      </div>
     </div>
 
-    <div class="tagline">Smart Copy & Paste Tool ⚡</div>
+    <!-- Active Tab Status Card -->
+    <div class="card current-site-card">
+      <div class="card-title">
+        <span>Current Tab</span>
+        <span id="statusBadge" class="status-badge allowed">Allowed</span>
+      </div>
+      <div class="domain-display">
+        <span id="currentDomain" class="domain-name">Detecting...</span>
+      </div>
+      <button id="toggleCurrentBtn" class="btn btn-danger" disabled>
+        🚫 Block Current Site
+      </button>
+    </div>
 
-    <div class="emoji">🚀</div>
+    <!-- Add Custom Site Card -->
+    <div class="card">
+      <div class="card-title">Add Site to Blocklist</div>
+      <div class="input-group">
+        <input type="text" id="siteInput" class="input-field" placeholder="e.g. example.com" />
+        <button id="addSiteBtn" class="btn btn-primary btn-add">+ Add</button>
+      </div>
+      <div id="toast" class="toast"></div>
+    </div>
 
-    <div class="thanks-pill">Thanks for using 😊</div>
+    <!-- Blocked Sites List Card -->
+    <div class="card">
+      <div class="section-header">
+        <div class="card-title" style="margin-bottom:0;">
+          Blocked Sites
+        </div>
+        <span id="siteCount" class="badge-count">0</span>
+      </div>
+      <div id="siteList" class="site-list">
+        <div class="empty-state">
+          <span>🛡️</span>
+          No sites blocked yet.<br/>Add a site above to block copy-paste on it.
+        </div>
+      </div>
+    </div>
 
     <div class="footer">Made with ❤️ by Yuvraj Singh</div>
   </div>

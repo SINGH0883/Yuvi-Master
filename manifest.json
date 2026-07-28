@@ -23,7 +23,8 @@
     "clipboardRead",
     "clipboardWrite",
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
 
   "host_permissions": [
