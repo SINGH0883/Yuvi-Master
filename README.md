@@ -3,7 +3,7 @@
   <h1>✨ Yuvi Master — Universal Copy & Paste Enabler</h1>
 
   <p align="center">
-    <strong>A lightweight Manifest V3 Chrome Extension that automatically bypasses copy-paste restrictions on ALL websites at all times — zero configuration required!</strong>
+    <strong>A lightweight Manifest V3 Chrome Extension designed to automatically bypass copy-paste restrictions, unblock text selection, and force text insertion on protected web forms across all websites.</strong>
   </p>
 
   <p align="center">
@@ -27,9 +27,9 @@
 
 ## 🌟 Overview
 
-**Yuvi Master** is a high-utility browser extension designed to **enable full copy and paste functionality across every website automatically**, without needing to turn any settings ON or OFF.
+**Yuvi Master** is a high-utility browser extension that restores full copy and paste functionality on web pages restricting standard clipboard operations (such as online examination portals, locked form inputs, disabled text fields, or protected articles).
 
-Whenever a website attempts to block text selection, disable context menus, or prevent pasting into locked forms, **Yuvi Master** overrides the site's script restrictions and seamlessly injects your copied text into any `<input>`, `<textarea>`, or `contenteditable` field.
+Operating automatically in the background on every web page, **Yuvi Master** overrides restrictive site scripts, enables text selection, wipes inline event blocks, and injects copied text into any `<input>`, `<textarea>`, or `contenteditable` element using a dual-buffer fallback engine.
 
 ---
 
@@ -40,11 +40,11 @@ flowchart TD
     A["📄 Web Page Loaded (document_start)"] --> B["Inject content.js Listener"]
     
     subgraph CSS_ENFORCER ["Selection CSS Enforcer"]
-      B --> C["Inject user-select: text !important"]
+        B --> C["Inject user-select: text !important"]
     end
     
     subgraph UNBLOCKER ["Inline Event Handler Cleaner"]
-      B --> D["Wipe oncopy, onpaste, oncontextmenu restrictions"]
+        B --> D["Wipe oncopy, onpaste, oncontextmenu restrictions"]
     end
 
     subgraph COPY_ENGINE ["Copy & Selection Engine"]
@@ -54,8 +54,8 @@ flowchart TD
     subgraph PASTE_ENGINE ["Smart Insertion Engine (Ctrl + V / Cmd + V)"]
         G["User Presses Ctrl + V"] --> H["Override Site e.preventDefault()"]
         H --> I{"Try navigator.clipboard.readText()"}
-        I -->|Allowed| J["Use System Clipboard"]
-        I -->|Blocked| K["Fallback to Memory Buffer"]
+        I -->|Allowed| J["Use System Clipboard Data"]
+        I -->|Blocked / Permission Denied| K["Fallback to Memory Buffer"]
         J --> L["insertTextSmart(text)"]
         K --> L
         L --> M["Dispatch Reactive 'input' & 'change' Events"]
@@ -67,11 +67,22 @@ flowchart TD
 
 ## ⚡ Core Features
 
-* **⚡ Universal Always-On Engine:** Automatically enables copy and paste across **all websites** without needing any ON/OFF toggle switches.
+* **⚡ Universal Always-On Engine:** Automatically enables copy and paste across **all websites** without needing any manual setup or ON/OFF toggle switches.
 * **🛡️ Bypasses Copy & Paste Restrictions:** Overrides `disabled` paste event handlers, blocked context menus, and custom website script restrictions.
 * **💾 Dual-Buffer Fallback System:** Automatically caches highlighted text selections in extension memory. If browser security blocks `navigator.clipboard`, the extension seamlessly falls back to memory storage.
 * **🎯 Reactive Form Insertion:** Injects text precisely at current cursor position (`selectionStart`/`selectionEnd`) and dispatches native reactive `input` and `change` events for full compatibility with React, Vue, Angular, and Svelte forms.
-* **✨ Clean Popup Interface:** Minimalist rounded popup card UI displaying current active website status.
+* **✨ Clean Popup Interface:** Minimalist rounded popup card UI displaying active website status and brand branding.
+
+---
+
+## 🔬 How It Works Under The Hood
+
+| Mechanism | Description |
+| :--- | :--- |
+| **CSS Selection Injection** | Injects `user-select: text !important` dynamically into document head so websites cannot disable text highlighting. |
+| **Inline Handler Sanitizer** | Periodically nullifies `oncopy`, `onpaste`, `oncut`, `oncontextmenu`, and `onselectstart` inline properties set by restrictive scripts. |
+| **Capture-Phase Interception** | Uses event listeners with `useCapture = true` to stop event propagation before website scripts can block key combinations (`Ctrl/Cmd + C/V/X`). |
+| **Reactive DOM Dispatcher** | Triggers native `input` and `change` events after text splicing, allowing form validation scripts in modern web frameworks (React, Vue, Angular) to register pasted values. |
 
 ---
 
@@ -116,7 +127,7 @@ Developer mode  [  ON  ]
 ### Step 5: Pin & Enjoy!
 * Click the Extensions puzzle icon (🧩) in your browser toolbar next to the address bar.
 * Find **Yuvi Master** and click the **Pin** icon (📌).
-* Enjoy unrestricted copy and paste capabilities everywhere!
+* Enjoy unrestricted copy and paste capabilities across all websites!
 
 ---
 
@@ -126,7 +137,7 @@ Developer mode  [  ON  ]
 Yuvi-Master/
 ├── manifest.json      # Chrome Extension Manifest V3 Configuration
 ├── content.js         # Universal Copy-Paste Enabler & DOM Inserter Script
-├── popup.html         # Minimalist Control Panel Interface
+├── popup.html         # Modern Control Panel Interface
 ├── popup.js           # Extension Popup Script
 ├── icon.png           # Extension Toolbar & Store Icon
 └── README.md          # Project Documentation & Installation Guide
