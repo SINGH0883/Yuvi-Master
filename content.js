@@ -11,7 +11,7 @@ function enableTextSelectionCSS() {
   const style = document.createElement("style");
   style.id = "yuvi-master-enable-select";
   style.textContent = `
-    * {
+    html, body, body * {
       -webkit-user-select: text !important;
       -moz-user-select: text !important;
       -ms-user-select: text !important;
@@ -23,9 +23,8 @@ function enableTextSelectionCSS() {
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", enableTextSelectionCSS);
-} else {
-  enableTextSelectionCSS();
 }
+enableTextSelectionCSS();
 
 // -------------------------------------------------------------
 // 2. UNBLOCK INLINE EVENT HANDLERS (ONCOPY, ONPASTE, ONCONTEXTMENU)
@@ -37,19 +36,21 @@ function unblockInlineHandlers() {
     document.onpaste = null;
     document.oncontextmenu = null;
     document.onselectstart = null;
+    document.ondragstart = null;
     window.oncopy = null;
     window.oncut = null;
     window.onpaste = null;
     window.oncontextmenu = null;
     window.onselectstart = null;
+    window.ondragstart = null;
   } catch (e) {}
 }
 
 unblockInlineHandlers();
-setInterval(unblockInlineHandlers, 2000);
+setInterval(unblockInlineHandlers, 1500);
 
 // -------------------------------------------------------------
-// 3. COPY & CUT LISTENERS (RECORD SELECTION IN MEMORY)
+// 3. COPY, CUT, CONTEXTMENU & SELECTSTART UNBLOCKERS
 // -------------------------------------------------------------
 document.addEventListener("copy", (e) => {
   const selection = window.getSelection().toString();
@@ -67,8 +68,15 @@ document.addEventListener("cut", (e) => {
   e.stopPropagation();
 }, true);
 
-// Allow right-click context menu everywhere
 document.addEventListener("contextmenu", (e) => {
+  e.stopPropagation();
+}, true);
+
+document.addEventListener("selectstart", (e) => {
+  e.stopPropagation();
+}, true);
+
+document.addEventListener("dragstart", (e) => {
   e.stopPropagation();
 }, true);
 
